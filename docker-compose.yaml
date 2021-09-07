@@ -1,0 +1,12 @@
+roistat-test_cont:
+  container_name:  roistat-test
+  restart: always
+  build: ./docker/php_7.2.0
+  volumes_from:
+       - nginx
+  environment:
+    - VIRTUAL_HOST=roistat-test.xip.io
+    - VIRTUAL_PROTO=fastcgi_php
+    - VIRTUAL_PORT=9000
+    - VIRTUAL_ROOT=/var/www/html/roistat_test/public
+  working_dir: /var/www/html/roistat_test/
