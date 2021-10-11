@@ -2,9 +2,6 @@
 
 class ApacheLogParser
 {
-    /**
-     * https://gist.github.com/lstoll/45014
-     */
     private $_pattern = "/^(\S+) (\S+) (\S+) \[([^:]+):(\d+:\d+:\d+) ([^\]]+)\] \"(\S+) (.*?) (\S+)\" (\S+) (\S+) (\".*?\") (\".*?\")$/";
     private $_file;
 
@@ -15,9 +12,9 @@ class ApacheLogParser
      */
     public function __construct(string $pathToFile)
     {
-        $this->_file = fopen($pathToFile, 'r');
+        $this->_file = @fopen($pathToFile, 'r'); //*ToDo Вынести в собственную функцию, как line() и closeFile(), обернуть в try/catch, чтобы избавиться от @
         if (!$this->_file){
-            throw new \Exception('Wrong path to file');
+            throw new \Exception('File not found');
         }
     }
 
@@ -51,19 +48,10 @@ class ApacheLogParser
         }
 
         $formattedLog = [];
-        $formattedLog['ip'] = $matches[1];
-        $formattedLog['identity'] = $matches[2];
-        $formattedLog['user'] = $matches[2];
-        $formattedLog['date'] = $matches[4];
-        $formattedLog['time'] = $matches[5];
-        $formattedLog['timezone'] = $matches[6];
-        $formattedLog['method'] = $matches[7];
-        $formattedLog['path'] = $matches[8];
-        $formattedLog['protocol'] = $matches[9];
-        $formattedLog['statusCode'] = $matches[10];
+        $formattedLog['path'] = $matches[8] ?? null;
+        $formattedLog['statusCode'] = $matches[10] ?? null; //*ToDo проверить типы элементов!!!
         $formattedLog['bytes'] = $matches[11];
-        $formattedLog['referer'] = $matches[12];
-        $formattedLog['userAgent'] = $matches[13];
+        $formattedLog['userAgent'] = $matches[13] ?? null;
 
         return $formattedLog;
     }

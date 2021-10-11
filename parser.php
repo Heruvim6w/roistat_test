@@ -3,9 +3,9 @@
 $pathToDirectory = __DIR__;
 
 require_once("{$pathToDirectory}/classes/ApacheLogParser.php");
-require_once("{$pathToDirectory}/classes/CalculateResults.php");
+require_once("{$pathToDirectory}/classes/Results.php");
 
-$calculateResults = new \CalculateResults();
+$calculateResults = new \Results();
 
 if (!$argv[1]) {
     $result = [
@@ -16,7 +16,7 @@ if (!$argv[1]) {
     try {
         $apacheLogParser = new \ApacheLogParser($pathToDirectory . $argv[1]);
     } catch (Exception $e) {
-        echo 'Exception: ', $e->getMessage(), "\n";
+        echo $e->getMessage(), "\n";
         exit();
     }
     $lines = $apacheLogParser->handle();
@@ -27,5 +27,3 @@ if (!$argv[1]) {
     $result = $calculateResults->prepareResult();
 }
 echo json_encode($result);
-unset($apacheLogParser);
-unset($calculateResults);
