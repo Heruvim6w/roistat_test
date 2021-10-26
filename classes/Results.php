@@ -35,7 +35,12 @@ class Results
         ];
     }
 
-    public function calculateTraffic($bytes, $status)
+    /**
+     * @param int $bytes
+     * @param int $status
+     * @return void
+     */
+    private function calculateTraffic(int $bytes, int$status)
     {
         if ($status != 301) {
             $this->_traffic += $bytes;
@@ -43,15 +48,15 @@ class Results
     }
 
     /**
-     * @param string $crawlerFromLine
+     * @param string $userAgent
      * @return void
      */
-    private function calculateCrawlers(string $crawlerFromLine)
+    private function calculateCrawlers(string $userAgent)
     {
         $crawlers = array_keys($this->_crawlers);
         foreach ($crawlers as $crawler) {
-            $lineBot = strpos($crawlerFromLine, $crawler);
-            if ($lineBot !== false) {
+            $lineBot = strpos($userAgent, $crawler);
+            if (is_int($lineBot)) {
                 $this->_crawlers[$crawler] += 1;
             }
         }

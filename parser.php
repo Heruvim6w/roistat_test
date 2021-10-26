@@ -5,25 +5,24 @@ $pathToDirectory = __DIR__;
 require_once("{$pathToDirectory}/classes/ApacheLogParser.php");
 require_once("{$pathToDirectory}/classes/Results.php");
 
-$calculateResults = new \Results();
+$results = new \Results();
 
-if (!$argv[1]) {
-    $result = [
-        'result' => false,
-        'message' => 'To few arguments'
-    ];
-} else {
+if (!is_file($argv[1])) {
+    echo 'File not found', "\n";
+}
+else {
     try {
-        $apacheLogParser = new \ApacheLogParser($pathToDirectory . $argv[1]);
+        $apacheLogParser = new \ApacheLogParser($argv[1]);
     } catch (Exception $e) {
         echo $e->getMessage(), "\n";
         exit();
     }
     $lines = $apacheLogParser->handle();
+
     foreach ($lines as $line) {
-        $calculateResults->handle($line);
+        $results->handle($line);
     }
 
-    $result = $calculateResults->prepareResult();
+    $result = $results->prepareResult();
+    echo json_encode($result), "\n";
 }
-echo json_encode($result);

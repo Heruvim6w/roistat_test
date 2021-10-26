@@ -12,10 +12,11 @@ class ApacheLogParser
      */
     public function __construct(string $pathToFile)
     {
-        $this->_file = @fopen($pathToFile, 'r'); //*ToDo Вынести в собственную функцию, как line() и closeFile(), обернуть в try/catch, чтобы избавиться от @
-        if (!$this->_file){
-            throw new \Exception('File not found');
+        if (!is_readable($pathToFile)) {
+            throw new \Exception('Access Denied!');
         }
+
+        $this->openFile($pathToFile);
     }
 
     /**
@@ -34,26 +35,12 @@ class ApacheLogParser
     }
 
     /**
-     * https://gist.github.com/lstoll/45014
-     *
-     * @param string $line
-     * @return array
+     * @param string $pathToFile
+     * @return void
      */
-    private function parseLine(string $line): array
+    private function openFile(string $pathToFile)
     {
-        preg_match($this->_pattern, $line, $matches);
-
-        if (!isset($matches[0])) {
-            return [];
-        }
-
-        $formattedLog = [];
-        $formattedLog['path'] = $matches[8] ?? null;
-        $formattedLog['statusCode'] = $matches[10] ?? null; //*ToDo проверить типы элементов!!!
-        $formattedLog['bytes'] = $matches[11];
-        $formattedLog['userAgent'] = $matches[13] ?? null;
-
-        return $formattedLog;
+        $this->_file = @fopen($pathToFile, 'r');
     }
 
     /**
@@ -62,6 +49,27 @@ class ApacheLogParser
     private function line():string
     {
         return fgets($this->_file);
+    }
+
+    /**
+     * @param string $line
+     * @return array
+     */
+    private function parseLine(string $line): array
+    {
+        preg_match($this->_pattern, $line, $matches);
+
+        if (count($matches) < 1) {
+            return [];
+        }
+
+        $formattedLog = [];
+        $formattedLog['path'] = filter_var($matches[8], FILTER_SANITIZE_STRING);
+        $formattedLog['statusCode'] = filter_var($matches[10], FILTER_SANITIZE_NUMBER_INT);
+        $formattedLog['bytes'] = filter_var($matches[11], FILTER_SANITIZE_NUMBER_INT);
+        $formattedLog['userAgent'] = filter_var($matches[13], FILTER_SANITIZE_STRING);
+
+        return $formattedLog;
     }
 
     /**
